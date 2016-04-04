@@ -11,6 +11,9 @@ var paddleApp = (function() {
 
   var board, tPaddle, rPaddle, bPaddle, lPaddle, userPaddle;
 
+  var impactHandlers = {};
+  var gamePaused = null;
+
   /****************
   ** The Game Board
   ****************/
@@ -68,9 +71,30 @@ var paddleApp = (function() {
 
     if (this.owner === 'client') {
       newPaddle.call(dragHandler);
+
       document.addEventListener('keydown', function(e) {
         paddle.keyHandler(e.keyCode, data);
       });
+
+      impactHandlers[this.side] = function(ballCoord) {
+        var x = data.x;
+        var y = data.y;
+        if (data.side === 'left' || data.side === 'right') {
+          if (ballCoord < y || ballCoord > y + paddleL) {
+            gamePaused = true;
+            return 0;
+          } else {
+            return(-(((paddleL / 2) - (ballCoord - y)) / paddleL) * 16);
+          }
+        } else if (data.side === 'top' || data.side === 'bottom') {
+          if (ballCoord < x || ballCoord > x + paddleL) {
+            gamePaused = true;
+            return 0;
+          } else {
+            return(-(((paddleL / 2) - (ballCoord - x)) / paddleL) * 16);
+          }
+        }
+      };
     }
     // select user paddle for dragging purposes
     userPaddle = d3.select('.client');
@@ -143,6 +167,69 @@ var paddleApp = (function() {
       .attr('fill', '#FF0000');
   }
 
+  Ball.prototype.draw = function() {
+    board
+      .selectAll('circle')
+      .attr({
+        cx : this.cx,
+        cy : this.cy
+      });
+  };
+
+  Ball.prototype.move = function() {
+    var ball = this;
+
+    ball.cx += ball.vx;
+    ball.cy += ball.vy;
+
+    if (ball.cx + ball.rad > width) {
+      ball.cx = width - ball.rad;
+      ball.vx = -ball.vx;
+      if (impactHandlers.right) {
+        ball.vy = impactHandlers.right(ball.cy);
+      }
+    }
+
+    if (ball.cx < ball.rad) {
+      
+      ball.cx = ball.rad;
+      ball.vx = -ball.vx;
+      if (impactHandlers.left) {
+        ball.vy = impactHandlers.left(ball.cy);
+      }
+    }
+
+    if (ball.cy + ball.rad > height) {
+      ball.cy = height - ball.rad;
+      ball.vy = -ball.vy;
+      if (impactHandlers.bottom) {
+        ball.vx = impactHandlers.bottom(ball.cx);
+      }
+    }
+
+    if (ball.cy < ball.rad) {
+      ball.cy = ball.rad;
+      ball.vy = -ball.vy;
+      if (impactHandlers.top) {
+        ball.vx = impactHandlers.top(ball.cx);
+      }
+    }
+
+    ball.draw();
+  };
+
+
+  // start up the ball
+  function startGame() {
+    board.selectAll('circle').remove();
+    var gameball = new Ball(width / 2, height / 2);
+
+    gamePaused = false;
+    playTimer = d3.timer(function() {
+      gameball.move();
+      return gamePaused;
+    }, 500);
+  }
 
   /****************
   ** Start the app
@@ -150,7 +237,7 @@ var paddleApp = (function() {
   app.init = function() {
     setupBoard();
 
-    var gameball = new Ball(width / 2, height / 2);
+    startGame();    
 
     lPaddle = new Paddle('foreign', 'left');
     tPaddle = new Paddle('client', 'top');
