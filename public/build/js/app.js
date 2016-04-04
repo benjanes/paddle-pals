@@ -1,5 +1,6 @@
 var paddleApp = (function() {
   var app = {};
+  var socket = io();
 
   // game variables
   var width = 500;
@@ -218,6 +219,12 @@ var paddleApp = (function() {
     ball.draw();
   };
 
+  function addSocketListeners(s) {
+    s.on('message', function(message) {
+      console.log(message);
+    });
+  }
+
 
   // start up the ball
   function startGame() {
@@ -231,16 +238,22 @@ var paddleApp = (function() {
     }, 500);
   }
 
+  function addRoom() {
+    setupBoard();
+    startGame();
+    lPaddle = new Paddle('foreign', 'left');
+    tPaddle = new Paddle('client', 'top');
+  }
+
   /****************
   ** Start the app
   ****************/
   app.init = function() {
-    setupBoard();
+      
 
-    startGame();    
+    addRoom();
 
-    lPaddle = new Paddle('foreign', 'left');
-    tPaddle = new Paddle('client', 'top');
+    addSocketListeners(socket);
   };
 
   return app;
