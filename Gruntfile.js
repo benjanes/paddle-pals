@@ -62,4 +62,4 @@ module.exports = function(grunt) {
 
   grunt.registerTask('default', ['sass', 'jshint', 'watch']);
   grunt.registerTask('build', ['sass', 'autoprefixer', 'uglify']);
-}
+};
