@@ -1,7 +1,7 @@
 module.exports = function(grunt) {
   'use strict';
 
-  var jsLibs = ['bower_components/d3/d3.min.js'];
+  var jsLibs = ['public/build/js/libs/d3.min.js'];
   var jsApp = ['public/build/js/app.js'];
 
   grunt.initConfig({
