@@ -2,6 +2,9 @@ var paddleApp = (function() {
   var app = {};
   var socket = io();
 
+  // entry point variables
+  var $currentGames = $('#current_games');
+
   // game variables
   var width = 500;
   var height = 500;
@@ -14,6 +17,7 @@ var paddleApp = (function() {
 
   var impactHandlers = {};
   var gamePaused = null;
+
 
   /****************
   ** The Game Board
@@ -219,13 +223,6 @@ var paddleApp = (function() {
     ball.draw();
   };
 
-  function addSocketListeners(s) {
-    s.on('message', function(message) {
-      console.log(message);
-    });
-  }
-
-
   // start up the ball
   function startGame() {
     board.selectAll('circle').remove();
@@ -239,21 +236,49 @@ var paddleApp = (function() {
   }
 
   function addRoom() {
+    socket.emit('roomAdd');
     setupBoard();
     startGame();
-    lPaddle = new Paddle('foreign', 'left');
-    tPaddle = new Paddle('client', 'top');
+    bPaddle = new Paddle('client', 'bottom');
+  }
+
+  function showRooms(rooms) {
+    var counter = 1;
+
+    for (var room in rooms) {
+      createRoomListing(room, counter);
+      counter++;
+    }
+  }
+
+  function createRoomListing(room, count) {
+    var $room = $('<li></li>');
+    $room.text('Game ' + count);
+    $room.addClass('current-game');
+    $room.click(function() {
+      console.log(room);
+    });
+    $currentGames.append($room);
+  }
+
+  function addSocketListeners(s) {
+    s.on('message', function(rooms) {
+      showRooms(rooms);
+    });
+  }
+
+  function addClickHandlers() {
+    $('#add_game').click(function() {
+      addRoom();
+    });
   }
 
   /****************
   ** Start the app
   ****************/
   app.init = function() {
-      
-
-    addRoom();
-
     addSocketListeners(socket);
+    addClickHandlers();
   };
 
   return app;
