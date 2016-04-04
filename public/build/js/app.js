@@ -4,6 +4,8 @@ var paddleApp = (function() {
 
   // entry point variables
   var $currentGames = $('#current_games');
+  var clientId;
+  var gameRoom;
 
   // game variables
   var width = 500;
@@ -237,11 +239,14 @@ var paddleApp = (function() {
 
   function addRoom() {
     socket.emit('roomAdd');
+    gameRoom = clientId;
     setupBoard();
     startGame();
     bPaddle = new Paddle('client', 'bottom');
   }
 
+
+  // show all the rooms currently in play with fewer than 4 players
   function showRooms(rooms) {
     var counter = 1;
 
@@ -256,15 +261,32 @@ var paddleApp = (function() {
     $room.text('Game ' + count);
     $room.addClass('current-game');
     $room.click(function() {
-      console.log(room);
+      joinRoom(room);
     });
     $currentGames.append($room);
   }
 
+
+  function joinRoom(room) {
+    gameRoom = room;
+    socket.emit('joinRoom', room);
+  }
+
+
   function addSocketListeners(s) {
-    s.on('message', function(rooms) {
-      showRooms(rooms);
+    s.on('message', function(idAndRooms) {
+      clientId = idAndRooms.id;
+      showRooms(idAndRooms.rooms);
+      console.log(clientId);
     });
+
+    s.on('add player', function(player) {
+      console.log('add player ' + player);
+    });
+    // s.on('roomAssignment', function(roomname) {
+    //   gameRoom = roomname;
+    //   console.log('something happened');
+    // });
   }
 
   function addClickHandlers() {
@@ -279,6 +301,7 @@ var paddleApp = (function() {
   app.init = function() {
     addSocketListeners(socket);
     addClickHandlers();
+
   };
 
   return app;
