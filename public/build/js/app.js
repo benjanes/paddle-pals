@@ -6,6 +6,8 @@ var paddleApp = (function() {
   var height = 500;
   var paddleW = 4;
   var paddleL = 80;
+  var ballRad = 12;
+  var baseSpeed = 4;
 
   var board, tPaddle, rPaddle, bPaddle, lPaddle, userPaddle;
 
@@ -18,6 +20,7 @@ var paddleApp = (function() {
       .attr('width', width)
       .attr('height', height);
   }
+
 
   /****************
   ** Paddle Class
@@ -117,8 +120,38 @@ var paddleApp = (function() {
     }
   });
 
+
+  /****************
+  ** Ball settings
+  ****************/
+  // add ball
+  // start it in the center of the screen
+  function Ball(x, y) {
+    this.id = '#game_ball';
+    this.cx = x;
+    this.cy = y;
+    this.rad = ballRad;
+    this.speed = baseSpeed;
+
+    this.vx = Math.cos(Math.PI / 3) * this.speed;
+    this.vy = Math.sin(Math.PI / 3) * this.speed;
+    
+    board.append('circle').attr('id', this.id)
+      .attr('cx', width / 2)
+      .attr('cy', height / 2)
+      .attr('r', ballRad)
+      .attr('fill', '#FF0000');
+  }
+
+
+  /****************
+  ** Start the app
+  ****************/
   app.init = function() {
     setupBoard();
+
+    var gameball = new Ball(width / 2, height / 2);
+
     lPaddle = new Paddle('foreign', 'left');
     tPaddle = new Paddle('client', 'top');
   };
