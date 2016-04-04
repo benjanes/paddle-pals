@@ -65,9 +65,35 @@ var paddleApp = (function() {
 
     if (this.owner === 'client') {
       newPaddle.call(dragHandler);
+      document.addEventListener('keydown', function(e) {
+        paddle.keyHandler(e.keyCode, data);
+      });
     }
     // select user paddle for dragging purposes
     userPaddle = d3.select('.client');
+  };
+
+  Paddle.prototype.keyHandler = function(key, data) {
+    if (this.side === 'bottom' || this.side === 'top') {
+      if (key === 39) {
+        data.x += 10;
+        data.x = Math.min(data.x, width - paddleL);
+      } else if (key === 37) {
+        data.x -= 10;
+        data.x = Math.max(data.x, 0);
+      }
+      userPaddle.data([data]).attr('x', data.x);
+    }
+    if (this.side === 'left' || this.side === 'right') {
+      if (key === 38) {
+        data.y -= 10;
+        data.y = Math.max(data.y, 0);
+      } else if (key === 40) {
+        data.y += 10;
+        data.y = Math.min(data.y, height - paddleL);
+      }
+      userPaddle.data([data]).attr('y', data.y);
+    }
   };
 
   // drag handler for the client's paddle
@@ -93,7 +119,8 @@ var paddleApp = (function() {
 
   app.init = function() {
     setupBoard();
-    bPaddle = new Paddle('client', 'bottom');
+    lPaddle = new Paddle('foreign', 'left');
+    tPaddle = new Paddle('client', 'top');
   };
 
   return app;
