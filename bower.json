@@ -1,0 +1,21 @@
+{
+  "name": "paddle-pals",
+  "description": "A collaborative game built with D3 and Socket.IO",
+  "main": "index.js",
+  "authors": [
+    "Ben Janes"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/benjanes/paddle-pals",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "~3.5.16"
+  }
+}
