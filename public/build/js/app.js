@@ -100,56 +100,45 @@ var paddleApp = (function() {
       });
 
       impactHandlers[this.side] = function(ballData) {
-        var vy, vx;
+        var vy = ballData.vy;
+        var vx = ballData.vx;
         var x = data.x;
         var y = data.y;
+
         if (data.side === 'left' || data.side === 'right') {
           if (ballData.cy < y || ballData.cy > y + paddleL) {
-            // gamePaused = true;
-            roomScore = 0;
-            updateScore(roomScore);
             vy = 0;
+            roomScore = 0;
           } else {
             vy = -(((paddleL / 2) - (ballData.cy - y)) / paddleL) * 16;
             roomScore = roomScore + 1 || 1;
-            updateScore(roomScore);
           }
-          ballData.vy = vy;
-          socket.emit('ballImpact', {
-            room : gameRoom,
-            owner : clientId,
-            data : {
-              cx : ballData.cx,
-              cy : ballData.cy,
-              vx : ballData.vx,
-              vy : ballData.vy
-            }
-          });
-          return vy;
         } else if (data.side === 'top' || data.side === 'bottom') {
           if (ballData.cx < x || ballData.cx > x + paddleL) {
-            // gamePaused = true;
-            roomScore = 0;
-            updateScore(roomScore);
             vx = 0;
+            roomScore = 0;
           } else {
             vx = -(((paddleL / 2) - (ballData.cx - x)) / paddleL) * 16;
             roomScore = roomScore + 1 || 1;
-            updateScore(roomScore);
           }
-          ballData.vx = vx;
-          socket.emit('ballImpact', {
-            room : gameRoom,
-            owner : clientId,
-            data : {
-              cx : ballData.cx,
-              cy : ballData.cy,
-              vx : ballData.vx,
-              vy : ballData.vy
-            }
-          });
-          return vx; 
         }
+
+        updateScore(roomScore);
+        socket.emit('ballImpact', {
+          room : gameRoom,
+          owner : clientId,
+          score : roomScore,
+          data : {
+            cx : ballData.cx,
+            cy : ballData.cy,
+            vx : ballData.vx,
+            vy : ballData.vy
+          }
+        });
+        return {
+          vx : vx,
+          vy : vy
+        };
       };
     }
     // select user paddle for dragging purposes
@@ -254,7 +243,7 @@ var paddleApp = (function() {
       ball.cx = width - ball.rad;
       ball.vx = -ball.vx;
       if (impactHandlers.right) {
-        ball.vy = impactHandlers.right(ball);
+        ball.vy = impactHandlers.right(ball).vy;
       }
     }
 
@@ -263,7 +252,7 @@ var paddleApp = (function() {
       ball.cx = ball.rad;
       ball.vx = -ball.vx;
       if (impactHandlers.left) {
-        ball.vy = impactHandlers.left(ball);
+        ball.vy = impactHandlers.left(ball).vy;
       }
     }
 
@@ -271,7 +260,7 @@ var paddleApp = (function() {
       ball.cy = height - ball.rad;
       ball.vy = -ball.vy;
       if (impactHandlers.bottom) {
-        ball.vx = impactHandlers.bottom(ball);
+        ball.vx = impactHandlers.bottom(ball).vx;
       }
     }
 
@@ -279,7 +268,7 @@ var paddleApp = (function() {
       ball.cy = ball.rad;
       ball.vy = -ball.vy;
       if (impactHandlers.top) {
-        ball.vx = impactHandlers.top(ball);
+        ball.vx = impactHandlers.top(ball).vx;
       }
     }
 
@@ -352,9 +341,8 @@ var paddleApp = (function() {
   }
 
   function resetBall(data) {
-    // grab data back from the other players about ball position
-    // after hitting a side, use it to update ball velocity and pos
     gameball.resetPosition(data);
+
   }
 
   function updatePaddles(playerList) {
@@ -419,9 +407,16 @@ var paddleApp = (function() {
 
     s.on('reset ball', function(ball) {
       if (clientId !== ball.owner) {
-        console.log('RESET BALL LOCATION');
         resetBall(ball.data);
       }
+
+      if (!roomScore || ball.score === 0) {
+        roomScore = ball.score;
+      } else {
+        roomScore = Math.max(roomScore, ball.score);
+      }
+
+      updateScore(roomScore);
     });
   }
 

@@ -50,7 +50,8 @@ io.on('connection', function(socket) {
   socket.on('ballImpact', function(ball) {
     io.to(ball.room).emit('reset ball', {
       owner : ball.owner,
-      data : ball.data
+      data : ball.data,
+      score : ball.score
     });
   });
 
