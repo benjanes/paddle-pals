@@ -8,6 +8,7 @@ var paddleApp = (function() {
   var allPlayers = [];
   var gameRoom;
   var gameball;
+  var roomScore, scoreboard;
 
   // game variables
   var width = 500;
@@ -33,6 +34,14 @@ var paddleApp = (function() {
       .append('svg')
       .attr('width', width)
       .attr('height', height);
+
+    // display the score
+    scoreboard = d3.select('#game_score')
+      .text(roomScore);
+  }
+
+  function updateScore(score) {
+    scoreboard.text(score);
   }
 
 
@@ -97,9 +106,13 @@ var paddleApp = (function() {
         if (data.side === 'left' || data.side === 'right') {
           if (ballData.cy < y || ballData.cy > y + paddleL) {
             // gamePaused = true;
+            roomScore = 0;
+            updateScore(roomScore);
             vy = 0;
           } else {
             vy = -(((paddleL / 2) - (ballData.cy - y)) / paddleL) * 16;
+            roomScore = roomScore + 1 || 1;
+            updateScore(roomScore);
           }
           ballData.vy = vy;
           socket.emit('ballImpact', {
@@ -116,9 +129,13 @@ var paddleApp = (function() {
         } else if (data.side === 'top' || data.side === 'bottom') {
           if (ballData.cx < x || ballData.cx > x + paddleL) {
             // gamePaused = true;
+            roomScore = 0;
+            updateScore(roomScore);
             vx = 0;
           } else {
             vx = -(((paddleL / 2) - (ballData.cx - x)) / paddleL) * 16;
+            roomScore = roomScore + 1 || 1;
+            updateScore(roomScore);
           }
           ballData.vx = vx;
           socket.emit('ballImpact', {
@@ -294,6 +311,7 @@ var paddleApp = (function() {
   function addRoom() {
     socket.emit('roomAdd');
     gameRoom = clientId;
+    roomScore = 0;
     setupBoard();
     allPlayers.push(clientId);
     startGame(width / 2, height / 2, Math.cos(Math.PI / 3) * baseSpeed, Math.sin(Math.PI / 3) * baseSpeed);

@@ -31,9 +31,10 @@ io.on('connection', function(socket) {
   socket.on('joinRoom', function(roomname) {
     socket.join(roomname);
 
+    // UPDATE THIS SO THAT NEW PLAYERS CAN JOIN AFTER OLD PLAYERS LEAVE!
     var side = paddleSides[Object.keys(allRooms[roomname]).length];
-
     allRooms[roomname][socket.id] = side;
+
     io.to(roomname).emit('add player', allRooms[roomname]);
   });
 
