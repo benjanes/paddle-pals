@@ -16,7 +16,9 @@ var paddleApp = (function() {
   var ballRad = 12;
   var baseSpeed = 4;
 
-  var board, tPaddle, rPaddle, bPaddle, lPaddle, userPaddle;
+  var board, userPaddle, clientPaddle;
+  // store everyone but the client
+  var gamePaddles = {};
 
   var impactHandlers = {};
   var gamePaused = null;
@@ -69,7 +71,8 @@ var paddleApp = (function() {
       data.l = paddleW;
     }
 
-    var newPaddle = board.append('rect').data([data])
+    var newPaddle = board.append('rect');
+    newPaddle.data([data])
       .classed(data.side + ' ' + this.owner, true)
       .attr('x', function(rect) { return rect.x; })
       .attr('y', function(rect) { return rect.y; })
@@ -106,6 +109,15 @@ var paddleApp = (function() {
     }
     // select user paddle for dragging purposes
     userPaddle = d3.select('.client');
+
+    if (this.owner === 'foreign') {
+      // UPDATE FUNCTION FOR HANDLING INCOMING DATA
+      this.repositionPaddle = function(data) {
+        newPaddle.data([data])
+          .attr('x', data.x)
+          .attr('y', data.y);
+      };
+    }
   };
 
   Paddle.prototype.keyHandler = function(key, data) {
@@ -129,6 +141,8 @@ var paddleApp = (function() {
       }
       userPaddle.data([data]).attr('y', data.y);
     }
+    // emit data out to other players in this room, along with the side
+    socket.emit('movingPaddle', {room : gameRoom, paddle : data});
   };
 
   // drag handler for the client's paddle
@@ -150,6 +164,8 @@ var paddleApp = (function() {
       }
       userPaddle.data([d]).attr('y', d.y);
     }
+    // emit data out to other players in this room, along with the side
+    socket.emit('movingPaddle', {room : gameRoom, paddle : d});
   });
 
 
@@ -242,10 +258,10 @@ var paddleApp = (function() {
     socket.emit('roomAdd');
     gameRoom = clientId;
     setupBoard();
-
+    allPlayers.push(clientId);
     // startGame();
 
-    bPaddle = new Paddle('client', 'bottom');
+    clientPaddle = new Paddle('client', 'bottom');
   }
 
 
@@ -282,9 +298,9 @@ var paddleApp = (function() {
     players.forEach(function(player) {
       if (allPlayers.indexOf(player) === -1) {
         if (player === clientId) {
-          // create a client paddle
+          clientPaddle = new Paddle('client', playerList[player]);
         } else {
-          // create foreign paddle on the given side
+          gamePaddles[playerList[player]] = new Paddle('foreign', playerList[player]);
         }
         allPlayers.push(player);
       }
@@ -301,6 +317,13 @@ var paddleApp = (function() {
 
     s.on('add player', function(players) {
       updatePaddles(players);
+    });
+
+    s.on('move paddle', function(data) {
+      // paddle position, data need to come through
+      if (gamePaddles[data.side]) {
+        gamePaddles[data.side].repositionPaddle(data);
+      }
     });
   }
 

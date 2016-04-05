@@ -38,6 +38,11 @@ io.on('connection', function(socket) {
     io.to(roomname).emit('add player', allRooms[roomname]);
   });
 
+  // deal with paddle movement
+  socket.on('movingPaddle', function(data) {
+    io.to(data.room).emit('move paddle', data.paddle);
+  });
+
   // leave room (remove user from room)
   // if last person to leave room, delete room
 
