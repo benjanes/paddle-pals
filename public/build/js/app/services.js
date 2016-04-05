@@ -19,7 +19,6 @@ angular.module('pp-services', [])
   })
 
   var getRooms = function() {
-    console.log(currentRooms);
     return currentRooms;
   };
 

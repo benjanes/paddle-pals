@@ -91,32 +91,32 @@ angular.module('pp-room', [])
         var vx = ballData.vx;
         var x = data.x;
         var y = data.y;
+        var score;
 
         if (data.side === 'left' || data.side === 'right') {
           if (ballData.cy < y || ballData.cy > y + paddleL) {
             vy = 0;
-            $scope.score = 0;
+            score = 0;
           } else {
             vy = -(((paddleL / 2) - (ballData.cy - y)) / paddleL) * 16;
-            $scope.score++;
+            score = $scope.score + 1;
           }
           ballData.vy = vy;
         } else if (data.side === 'top' || data.side === 'bottom') {
           if (ballData.cx < x || ballData.cx > x + paddleL) {
             vx = 0;
-            $scope.score = 0;
+            score = 0;
           } else {
             vx = -(((paddleL / 2) - (ballData.cx - x)) / paddleL) * 16;
-            $scope.score++;
+            score = $scope.score + 1;
           }
           ballData.vx = vx;
         }
 
-        // updateScore(roomScore);
         socket.emit('ballImpact', {
           room : $scope.gameRoom,
           owner : $scope.clientId,
-          score : $scope.score,
+          score : score,
           data : {
             cx : ballData.cx,
             cy : ballData.cy,
@@ -285,7 +285,6 @@ angular.module('pp-room', [])
   }
 
   function resetBall(data) {
-    // console.log(data);
     gameball.resetPosition(data);
   }
 
@@ -353,13 +352,12 @@ angular.module('pp-room', [])
     resetBall(ball.data);
 
 
-    // if (!roomScore || ball.score === 0) {
-    //   roomScore = ball.score;
-    // } else {
-    //   roomScore = Math.max(roomScore, ball.score);
-    // }
+    if (ball.score === 0) {
+      $scope.score = ball.score;
+    } else {
+      $scope.score = Math.max($scope.score, ball.score);
+    }
 
-    // updateScore(roomScore);
   });
 
   socket.on('remove player', function(player) {

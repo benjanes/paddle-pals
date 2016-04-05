@@ -11,12 +11,10 @@ app.use(express.static('public'));
 
 io.on('connection', function(socket) {
   // send out list of open rooms
-  console.log('CONNECTED');
   socket.send({id : socket.id, rooms : parseRooms(allRooms)});
 
   socket.on('roomAdd', function() {
     var id = socket.id;
-    console.log('room added! ' + id);
     allRooms[id] = {};
     allRooms[id][id] = 'bottom';
 
