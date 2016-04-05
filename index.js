@@ -44,9 +44,19 @@ io.on('connection', function(socket) {
 
   // leave room (remove user from room)
   socket.on('disconnect', function(data) {
+    // let the clients know
     io.emit('remove player', socket.id);
+    // remove player from room
+    for (var room in allRooms) {
+      if (allRooms[room][socket.id]) {
+        delete allRooms[room][socket.id];
+        // if last person to leave room, delete room
+        if (Object.keys(allRooms[room]).length === 0) {
+          delete allRooms[room];
+        }
+      }
+    }
   });
-  // if last person to leave room, delete room
 
 });
 
