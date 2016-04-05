@@ -15,7 +15,7 @@ var paddleApp = (function() {
   var paddleW = 4;
   var paddleL = 80;
   var ballRad = 12;
-  var baseSpeed = 4;
+  var baseSpeed = 2;
 
   var board, userPaddle, clientPaddle;
   // store everyone but the client
@@ -90,23 +90,48 @@ var paddleApp = (function() {
         paddle.keyHandler(e.keyCode, data);
       });
 
-      impactHandlers[this.side] = function(ballCoord) {
+      impactHandlers[this.side] = function(ballData) {
+        var vy, vx;
         var x = data.x;
         var y = data.y;
         if (data.side === 'left' || data.side === 'right') {
-          if (ballCoord < y || ballCoord > y + paddleL) {
-            gamePaused = true;
-            return 0;
+          if (ballData.cy < y || ballData.cy > y + paddleL) {
+            // gamePaused = true;
+            vy = 0;
           } else {
-            return(-(((paddleL / 2) - (ballCoord - y)) / paddleL) * 16);
+            vy = -(((paddleL / 2) - (ballData.cy - y)) / paddleL) * 16;
           }
+          ballData.vy = vy;
+          socket.emit('ballImpact', {
+            room : gameRoom,
+            owner : clientId,
+            data : {
+              cx : ballData.cx,
+              cy : ballData.cy,
+              vx : ballData.vx,
+              vy : ballData.vy
+            }
+          });
+          return vy;
         } else if (data.side === 'top' || data.side === 'bottom') {
-          if (ballCoord < x || ballCoord > x + paddleL) {
-            gamePaused = true;
-            return 0;
+          if (ballData.cx < x || ballData.cx > x + paddleL) {
+            // gamePaused = true;
+            vx = 0;
           } else {
-            return(-(((paddleL / 2) - (ballCoord - x)) / paddleL) * 16);
+            vx = -(((paddleL / 2) - (ballData.cx - x)) / paddleL) * 16;
           }
+          ballData.vx = vx;
+          socket.emit('ballImpact', {
+            room : gameRoom,
+            owner : clientId,
+            data : {
+              cx : ballData.cx,
+              cy : ballData.cy,
+              vx : ballData.vx,
+              vy : ballData.vy
+            }
+          });
+          return vx; 
         }
       };
     }
@@ -212,7 +237,7 @@ var paddleApp = (function() {
       ball.cx = width - ball.rad;
       ball.vx = -ball.vx;
       if (impactHandlers.right) {
-        ball.vy = impactHandlers.right(ball.cy);
+        ball.vy = impactHandlers.right(ball);
       }
     }
 
@@ -221,7 +246,7 @@ var paddleApp = (function() {
       ball.cx = ball.rad;
       ball.vx = -ball.vx;
       if (impactHandlers.left) {
-        ball.vy = impactHandlers.left(ball.cy);
+        ball.vy = impactHandlers.left(ball);
       }
     }
 
@@ -229,7 +254,7 @@ var paddleApp = (function() {
       ball.cy = height - ball.rad;
       ball.vy = -ball.vy;
       if (impactHandlers.bottom) {
-        ball.vx = impactHandlers.bottom(ball.cx);
+        ball.vx = impactHandlers.bottom(ball);
       }
     }
 
@@ -237,11 +262,19 @@ var paddleApp = (function() {
       ball.cy = ball.rad;
       ball.vy = -ball.vy;
       if (impactHandlers.top) {
-        ball.vx = impactHandlers.top(ball.cx);
+        ball.vx = impactHandlers.top(ball);
       }
     }
 
     ball.draw();
+  };
+
+  Ball.prototype.resetPosition = function(incomingData) {
+    var data = incomingData;
+    this.cx = data.cx;
+    this.cy = data.cy;
+    this.vx = data.vx;
+    this.vy = data.vy;
   };
 
   // start up the ball
@@ -297,7 +330,13 @@ var paddleApp = (function() {
   }
 
   function setBall(data) {
-    gameball = new Ball(data.cx, data.cy, data.vx, data.vy);
+    startGame(data.cx, data.cy, data.vx, data.vy);
+  }
+
+  function resetBall(data) {
+    // grab data back from the other players about ball position
+    // after hitting a side, use it to update ball velocity and pos
+    gameball.resetPosition(data);
   }
 
   function updatePaddles(playerList) {
@@ -357,6 +396,13 @@ var paddleApp = (function() {
     s.on('set ball', function(ball) {
       if (!gameball) {
         setBall(ball);
+      }
+    });
+
+    s.on('reset ball', function(ball) {
+      if (clientId !== ball.owner) {
+        console.log('RESET BALL LOCATION');
+        resetBall(ball.data);
       }
     });
   }

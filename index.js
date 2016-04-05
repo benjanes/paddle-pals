@@ -46,6 +46,13 @@ io.on('connection', function(socket) {
     io.to(data.room).emit('set ball', data.ball);
   });
 
+  socket.on('ballImpact', function(ball) {
+    io.to(ball.room).emit('reset ball', {
+      owner : ball.owner,
+      data : ball.data
+    });
+  });
+
   // leave room (remove user from room)
   socket.on('disconnect', function(data) {
     // let the clients know
