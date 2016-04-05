@@ -2,6 +2,9 @@
   "name": "paddle-pals",
   "description": "A collaborative game built with D3 and Socket.IO",
   "main": "index.js",
+  "scripts": {
+    "postinstall": "grunt build"
+  },
   "authors": [
     "Ben Janes"
   ],
@@ -17,6 +20,8 @@
   ],
   "dependencies": {
     "d3": "~3.5.16",
-    "angular": "~1.5.3"
+    "angular": "~1.5.3",
+    "angular-route": "~1.5.3",
+    "angular-socket-io": "~0.7.0"
   }
 }

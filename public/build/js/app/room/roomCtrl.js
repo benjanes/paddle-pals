@@ -1,6 +1,6 @@
 angular.module('pp-room', [])
 
-.controller('roomCtrl', function($scope, $rootScope, socket) {
+.controller('roomCtrl', function($scope, $rootScope, socket, $window) {
 
   $scope.score = 0;
   $scope.clientId = $rootScope.id;
@@ -373,6 +373,7 @@ angular.module('pp-room', [])
     });
 
     $rootScope.gameRoom = '';
+    $window.location.reload();
   });
 
   $scope.init = function() {
