@@ -2,9 +2,6 @@
   "name": "paddle-pals",
   "description": "A collaborative game built with D3 and Socket.IO",
   "main": "index.js",
-  "scripts": {
-    "postinstall": "grunt build"
-  },
   "authors": [
     "Ben Janes"
   ],
