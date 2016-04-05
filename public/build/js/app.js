@@ -7,6 +7,7 @@ var paddleApp = (function() {
   var clientId;
   var allPlayers = [];
   var gameRoom;
+  var gameball;
 
   // game variables
   var width = 500;
@@ -186,8 +187,8 @@ var paddleApp = (function() {
     this.vy = vy;
     
     board.append('circle').attr('id', this.id)
-      .attr('cx', width / 2)
-      .attr('cy', height / 2)
+      .attr('cx', this.cx)
+      .attr('cy', this.cy)
       .attr('r', ballRad)
       .attr('fill', '#FF0000');
   }
@@ -246,8 +247,10 @@ var paddleApp = (function() {
   // start up the ball
   function startGame(x, y, vx, vy) {
     board.selectAll('circle').remove();
-    var gameball = new Ball(x, y, vx, vy);
+    gameball = new Ball(x, y, vx, vy);
 
+    // setTimeout or something here so that game does
+    // not kickoff immediately
     gamePaused = false;
     playTimer = d3.timer(function() {
       gameball.move();
@@ -293,6 +296,10 @@ var paddleApp = (function() {
     socket.emit('joinRoom', room);
   }
 
+  function setBall(data) {
+    gameball = new Ball(data.cx, data.cy, data.vx, data.vy);
+  }
+
   function updatePaddles(playerList) {
     var players = Object.keys(playerList);
 
@@ -318,6 +325,20 @@ var paddleApp = (function() {
 
     s.on('add player', function(players) {
       updatePaddles(players);
+      if (gameball) {
+        var ballData = {
+          cx : gameball.cx,
+          cy : gameball.cy,
+          vx : gameball.vx,
+          vy : gameball.vy
+        };
+        var data = {
+          room : gameRoom,
+          ball : ballData
+        };
+
+        socket.emit('ballCoords', data);
+      }
     });
 
     s.on('move paddle', function(data) {
@@ -330,6 +351,12 @@ var paddleApp = (function() {
     s.on('remove player', function(player) {
       if (allPlayers.indexOf(player) !== -1) {
         d3.select('#' + player.slice(2)).remove();
+      }
+    });
+
+    s.on('set ball', function(ball) {
+      if (!gameball) {
+        setBall(ball);
       }
     });
   }

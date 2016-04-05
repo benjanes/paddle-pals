@@ -42,6 +42,10 @@ io.on('connection', function(socket) {
     io.to(data.room).emit('move paddle', data.paddle);
   });
 
+  socket.on('ballCoords', function(data) {
+    io.to(data.room).emit('set ball', data.ball);
+  });
+
   // leave room (remove user from room)
   socket.on('disconnect', function(data) {
     // let the clients know
