@@ -1,24 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="paddlePals">
 <head>
   <title>Paddle Pals</title>
   <link rel="stylesheet" type="text/css" href="dist/styles/style.css">
 </head>
 <body>
 
-<ul id="current_games"></ul>
-<button id="add_game">Start Your Own!</button>
-
-<div id="game_board"></div>
-<div id="game_score"></div>
+<h1>PaddlePals</h1>
+<div ng-view></div>
 
 <script src="dist/js/libs.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <!-- REPLACE THIS WITH MINIFIED SOURCE -->
-<script src="build/js/app.js"></script>
+<script src="build/js/app/entry/entryCtrl.js"></script>
+<script src="build/js/app/room/roomCtrl.js"></script>
+<script src="build/js/app/services.js"></script>
+<script src="build/js/app/app.js"></script>
 
-<script>
+<!-- <script>
   paddleApp.init();
-</script>
+</script> -->
 </body>
 </html>

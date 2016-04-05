@@ -11,20 +11,21 @@ app.use(express.static('public'));
 
 io.on('connection', function(socket) {
   // send out list of open rooms
-  var openRooms = {};
-  for (var room in allRooms) {
-    if (Object.keys(allRooms[room]).length < 4) {
-      openRooms[room] = allRooms[room];
-    }
-  }
-  socket.send({id : socket.id, rooms : openRooms});
+  console.log('CONNECTED');
+  socket.send({id : socket.id, rooms : parseRooms(allRooms)});
 
   socket.on('roomAdd', function() {
     var id = socket.id;
     console.log('room added! ' + id);
     allRooms[id] = {};
     allRooms[id][id] = 'bottom';
-    socket.to(id).emit('roomAssignment', id);
+
+    io.emit('update games', parseRooms(allRooms));
+    
+    setTimeout(function() {
+      socket.emit('start new game', id);
+    }, 100);
+    
   });
 
   // join existing room
@@ -34,8 +35,15 @@ io.on('connection', function(socket) {
     // UPDATE THIS SO THAT NEW PLAYERS CAN JOIN AFTER OLD PLAYERS LEAVE!
     var side = paddleSides[Object.keys(allRooms[roomname]).length];
     allRooms[roomname][socket.id] = side;
+    io.emit('update games', parseRooms(allRooms));
 
-    io.to(roomname).emit('add player', allRooms[roomname]);
+    setTimeout(function() {
+      io.to(roomname).emit('add player', {
+        room : roomname,
+        players : allRooms[roomname]
+      });
+    }, 100);
+  
   });
 
   // deal with paddle movement
@@ -56,22 +64,43 @@ io.on('connection', function(socket) {
   });
 
   // leave room (remove user from room)
-  socket.on('disconnect', function(data) {
-    // let the clients know
-    io.emit('remove player', socket.id);
-    // remove player from room
-    for (var room in allRooms) {
-      if (allRooms[room][socket.id]) {
-        delete allRooms[room][socket.id];
-        // if last person to leave room, delete room
-        if (Object.keys(allRooms[room]).length === 0) {
-          delete allRooms[room];
-        }
-      }
-    }
+  socket.on('disconnect', function() {
+    removePlayer(socket.id);
+    io.emit('update games', parseRooms(allRooms));
+  });
+
+  // leave room but stay in app
+  socket.on('leaveRoom', function(id) {
+    removePlayer(id);
+    io.emit('update games', parseRooms(allRooms));
   });
 
 });
+
+function removePlayer(id) {
+  // let the clients know
+  io.emit('remove player', id);
+  // remove player from room
+  for (var room in allRooms) {
+    if (allRooms[room][id]) {
+      delete allRooms[room][id];
+      // if last person to leave room, delete room
+      if (Object.keys(allRooms[room]).length === 0) {
+        delete allRooms[room];
+      }
+    }
+  }
+}
+
+function parseRooms(rooms) {
+  var openRooms = {};
+  for (var room in rooms) {
+    if (Object.keys(rooms[room]).length < 4) {
+      openRooms[room] = rooms[room];
+    }
+  }
+  return openRooms;
+}
 
 http.listen(port, function() {
   console.log('listening on ' + port);

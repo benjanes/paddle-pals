@@ -1,0 +1,5 @@
+<h4>Current Games</h4>
+<h4 ng-repeat="(room, members) in games">
+  <span ng-click="joinGame(room)">Game {{ $index + 1 }}</span>
+</h4>
+<button ng-click="addGame()">Start Your Own!</button>
