@@ -1,7 +1,7 @@
 angular.module('pp-entry', [])
 
 .controller('entryCtrl', function($scope, socket, $rootScope, $location, roomFactory) {
-  $scope.games = {};
+  $scope.games = [];
   $rootScope.gameRoom = '';
 
   socket.on('message', function() {

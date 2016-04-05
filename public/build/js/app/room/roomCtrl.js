@@ -9,8 +9,8 @@ angular.module('pp-room', [])
 
   var width = 500;
   var height = 500;
-  var paddleW = 4;
-  var paddleL = 80;
+  var paddleW = 6;
+  var paddleL = 90;
   var ballRad = 12;
   var baseSpeed = 2;
 
@@ -30,6 +30,41 @@ angular.module('pp-room', [])
       .append('svg')
       .attr('width', width)
       .attr('height', height);
+
+    var defs = board.append('defs');
+
+    var lightFilter = defs.append('filter')
+      .attr('id', 'light_filter')
+      .attr('filterUnits', 'userSpaceOnUse');
+
+    lightFilter.append('feGaussianBlur')
+      .attr('stdDeviation', 5)
+      .attr('in', 'SourceAlpha')
+      .attr('result', 'BLUR');
+
+    var lightFilterFe = lightFilter.append('feSpecularLighting')
+      .attr('in', 'BLUR')
+      .attr('surfaceScale', 6)
+      .attr('specularConstant', 1)
+      .attr('specularExponent', 30)
+      .attr('lighting-color', '#FFFFFF')
+      .attr('result', 'SPECULAR');
+
+    lightFilterFe.append('fePointLight')
+      .attr('x', 40)
+      .attr('y', -30)
+      .attr('z', 200);
+
+    lightFilter.append('feComposite')
+      .attr('in', 'SPECULAR')
+      .attr('in2', 'SourceGraphic')
+      .attr('operator', 'in')
+      .attr('result', 'COMPOSITE');
+
+    var filterMerge = lightFilter.append('feMerge');
+
+    filterMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+    filterMerge.append('feMergeNode').attr('in', 'COMPOSITE');
   }
 
   /****************
@@ -76,8 +111,7 @@ angular.module('pp-room', [])
       .attr('x', function(rect) { return rect.x; })
       .attr('y', function(rect) { return rect.y; })
       .attr('width', function(rect) { return rect.w; })
-      .attr('height', function(rect) { return rect.l; })
-      .attr('fill', '#000');
+      .attr('height', function(rect) { return rect.l; });
 
     if (this.owner === 'client') {
       newPaddle.call(dragHandler);
@@ -207,7 +241,7 @@ angular.module('pp-room', [])
       .attr('cx', this.cx)
       .attr('cy', this.cy)
       .attr('r', ballRad)
-      .attr('fill', '#FF0000');
+      .attr('fill', '#000000');
   }
 
   Ball.prototype.draw = function() {
@@ -351,9 +385,12 @@ angular.module('pp-room', [])
   socket.on('reset ball', function(ball) {
     resetBall(ball.data);
 
-
     if (ball.score === 0) {
       $scope.score = ball.score;
+      board.classed('newball', false);
+      setTimeout(function() {
+        board.classed('newball', true);  
+      }, 50);
     } else {
       $scope.score = Math.max($scope.score, ball.score);
     }

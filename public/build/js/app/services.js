@@ -7,15 +7,15 @@ angular.module('pp-services', [])
 
 .factory('roomFactory', function(socket, $rootScope) {
 
-  var currentRooms = {};
+  var currentRooms = [];
 
   socket.on('message', function(data) {
     $rootScope.id = data.id;
-    currentRooms = data.rooms;
+    currentRooms = Object.keys(data.rooms);
   });
 
   socket.on('update games', function(data) {
-    currentRooms = data;
+    currentRooms = Object.keys(data);
   });
 
   var getRooms = function() {
