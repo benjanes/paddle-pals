@@ -367,7 +367,12 @@ angular.module('pp-room', [])
   });
 
   $scope.$on('$locationChangeStart', function(next, current) {
-    socket.emit('leaveRoom', $scope.clientId);
+    socket.emit('leaveRoom', {
+      id : $scope.clientId,
+      room : $scope.gameRoom
+    });
+
+    $rootScope.gameRoom = '';
   });
 
   $scope.init = function() {

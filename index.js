@@ -31,8 +31,17 @@ io.on('connection', function(socket) {
     socket.join(roomname);
 
     // UPDATE THIS SO THAT NEW PLAYERS CAN JOIN AFTER OLD PLAYERS LEAVE!
-    var side = paddleSides[Object.keys(allRooms[roomname]).length];
+    var sides = paddleSides.slice();
+    for (var player in allRooms[roomname]) {
+      sides = sides.filter(function(side) {
+        return side !== allRooms[roomname][player];
+      });
+    }
+    console.log(sides);
+    var side = sides[0];
+    
     allRooms[roomname][socket.id] = side;
+    
     io.emit('update games', parseRooms(allRooms));
 
     setTimeout(function() {
@@ -68,8 +77,12 @@ io.on('connection', function(socket) {
   });
 
   // leave room but stay in app
-  socket.on('leaveRoom', function(id) {
-    removePlayer(id);
+  socket.on('leaveRoom', function(client) {
+    removePlayer(client.id);
+    if (socket.id === client.id) {
+      console.log('LEAVE ROOM');
+      socket.leave(client.room);
+    }
     io.emit('update games', parseRooms(allRooms));
   });
 
