@@ -176,15 +176,14 @@ var paddleApp = (function() {
   ****************/
   // add ball
   // start it in the center of the screen
-  function Ball(x, y) {
+  function Ball(x, y, vx, vy) {
     this.id = '#game_ball';
     this.cx = x;
     this.cy = y;
     this.rad = ballRad;
-    this.speed = baseSpeed;
 
-    this.vx = Math.cos(Math.PI / 3) * this.speed;
-    this.vy = Math.sin(Math.PI / 3) * this.speed;
+    this.vx = vx;
+    this.vy = vy;
     
     board.append('circle').attr('id', this.id)
       .attr('cx', width / 2)
@@ -245,9 +244,9 @@ var paddleApp = (function() {
   };
 
   // start up the ball
-  function startGame() {
+  function startGame(x, y, vx, vy) {
     board.selectAll('circle').remove();
-    var gameball = new Ball(width / 2, height / 2);
+    var gameball = new Ball(x, y, vx, vy);
 
     gamePaused = false;
     playTimer = d3.timer(function() {
@@ -261,7 +260,7 @@ var paddleApp = (function() {
     gameRoom = clientId;
     setupBoard();
     allPlayers.push(clientId);
-    // startGame();
+    startGame(width / 2, height / 2, Math.cos(Math.PI / 3) * baseSpeed, Math.sin(Math.PI / 3) * baseSpeed);
 
     clientPaddle = new Paddle('client', 'bottom', clientId);
   }
