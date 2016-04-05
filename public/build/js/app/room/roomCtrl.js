@@ -100,6 +100,7 @@ angular.module('pp-room', [])
             vy = -(((paddleL / 2) - (ballData.cy - y)) / paddleL) * 16;
             $scope.score++;
           }
+          ballData.vy = vy;
         } else if (data.side === 'top' || data.side === 'bottom') {
           if (ballData.cx < x || ballData.cx > x + paddleL) {
             vx = 0;
@@ -108,6 +109,7 @@ angular.module('pp-room', [])
             vx = -(((paddleL / 2) - (ballData.cx - x)) / paddleL) * 16;
             $scope.score++;
           }
+          ballData.vx = vx;
         }
 
         // updateScore(roomScore);
@@ -283,6 +285,7 @@ angular.module('pp-room', [])
   }
 
   function resetBall(data) {
+    // console.log(data);
     gameball.resetPosition(data);
   }
 
@@ -305,7 +308,6 @@ angular.module('pp-room', [])
   // SOCKET HANDLERS
   socket.on('start new game', function(id) {
     if (id === $rootScope.id) {
-      console.log('START IT UP, ' + id);
       allPlayers.push(id);
       $scope.gameRoom = id;
       startGame(width / 2, height / 2, Math.cos(Math.PI / 3) * baseSpeed, Math.sin(Math.PI / 3) * baseSpeed);

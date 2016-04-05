@@ -2,13 +2,12 @@ module.exports = function(grunt) {
   'use strict';
 
   var jsLibs = [
-    'public/build/js/libs/d3.min.js', 
-    'public/build/js/libs/jquery.min.js',
+    'public/build/js/libs/d3.min.js',
     'bower_components/angular/angular.min.js',
     'bower_components/angular-route/angular-route.min.js',
     'bower_components/angular-socket-io/socket.min.js'
   ];
-  var jsApp = ['public/build/js/app.js'];
+  var jsApp = ['public/build/js/app/**/*.js'];
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -37,6 +36,9 @@ module.exports = function(grunt) {
     },
 
     uglify: {
+      options: {
+        mangle: false
+      },
       dist: {
         files: {
           'public/dist/js/libs.min.js': [jsLibs],
