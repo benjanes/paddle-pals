@@ -29,7 +29,6 @@ io.on('connection', function(socket) {
 
   // join existing room
   socket.on('joinRoom', function(roomname) {
-    console.log(roomname);
     socket.join(roomname);
 
     var side = paddleSides[Object.keys(allRooms[roomname]).length];
@@ -44,6 +43,9 @@ io.on('connection', function(socket) {
   });
 
   // leave room (remove user from room)
+  socket.on('disconnect', function(data) {
+    io.emit('remove player', socket.id);
+  });
   // if last person to leave room, delete room
 
 });

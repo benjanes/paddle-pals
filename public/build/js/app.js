@@ -38,9 +38,10 @@ var paddleApp = (function() {
   /****************
   ** Paddle Class
   ****************/
-  function Paddle(owner, side) {
+  function Paddle(owner, side, id) {
     this.owner = owner;
     this.side = side;
+    this.id = id.slice(2);
     this.init();
   }
 
@@ -74,6 +75,7 @@ var paddleApp = (function() {
     var newPaddle = board.append('rect');
     newPaddle.data([data])
       .classed(data.side + ' ' + this.owner, true)
+      .attr('id', this.id)
       .attr('x', function(rect) { return rect.x; })
       .attr('y', function(rect) { return rect.y; })
       .attr('width', function(rect) { return rect.w; })
@@ -261,7 +263,7 @@ var paddleApp = (function() {
     allPlayers.push(clientId);
     // startGame();
 
-    clientPaddle = new Paddle('client', 'bottom');
+    clientPaddle = new Paddle('client', 'bottom', clientId);
   }
 
 
@@ -298,9 +300,9 @@ var paddleApp = (function() {
     players.forEach(function(player) {
       if (allPlayers.indexOf(player) === -1) {
         if (player === clientId) {
-          clientPaddle = new Paddle('client', playerList[player]);
+          clientPaddle = new Paddle('client', playerList[player], player);
         } else {
-          gamePaddles[playerList[player]] = new Paddle('foreign', playerList[player]);
+          gamePaddles[playerList[player]] = new Paddle('foreign', playerList[player], player);
         }
         allPlayers.push(player);
       }
@@ -323,6 +325,12 @@ var paddleApp = (function() {
       // paddle position, data need to come through
       if (gamePaddles[data.side]) {
         gamePaddles[data.side].repositionPaddle(data);
+      }
+    });
+
+    s.on('remove player', function(player) {
+      if (allPlayers.indexOf(player) !== -1) {
+        d3.select('#' + player.slice(2)).remove();
       }
     });
   }
