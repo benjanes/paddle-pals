@@ -13,7 +13,7 @@ io.on('connection', function(socket) {
   // send out list of open rooms
   var openRooms = {};
   for (var room in allRooms) {
-    if (allRooms[room].length < 4) {
+    if (Object.keys(allRooms[room]).length < 4) {
       openRooms[room] = allRooms[room];
     }
   }
@@ -22,7 +22,8 @@ io.on('connection', function(socket) {
   socket.on('roomAdd', function() {
     var id = socket.id;
     console.log('room added! ' + id);
-    allRooms[id] = [id];
+    allRooms[id] = {};
+    allRooms[id][id] = 'bottom';
     socket.to(id).emit('roomAssignment', id);
   });
 
@@ -31,8 +32,10 @@ io.on('connection', function(socket) {
     console.log(roomname);
     socket.join(roomname);
 
-    allRooms[roomname].push(socket.id);
-    io.to(roomname).emit('add player', socket.id);
+    var side = paddleSides[Object.keys(allRooms[roomname]).length];
+
+    allRooms[roomname][socket.id] = side;
+    io.to(roomname).emit('add player', allRooms[roomname]);
   });
 
   // leave room (remove user from room)

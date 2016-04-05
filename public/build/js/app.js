@@ -5,6 +5,7 @@ var paddleApp = (function() {
   // entry point variables
   var $currentGames = $('#current_games');
   var clientId;
+  var allPlayers = [];
   var gameRoom;
 
   // game variables
@@ -241,7 +242,9 @@ var paddleApp = (function() {
     socket.emit('roomAdd');
     gameRoom = clientId;
     setupBoard();
-    startGame();
+
+    // startGame();
+
     bPaddle = new Paddle('client', 'bottom');
   }
 
@@ -269,7 +272,23 @@ var paddleApp = (function() {
 
   function joinRoom(room) {
     gameRoom = room;
+    setupBoard();
     socket.emit('joinRoom', room);
+  }
+
+  function updatePaddles(playerList) {
+    var players = Object.keys(playerList);
+
+    players.forEach(function(player) {
+      if (allPlayers.indexOf(player) === -1) {
+        if (player === clientId) {
+          // create a client paddle
+        } else {
+          // create foreign paddle on the given side
+        }
+        allPlayers.push(player);
+      }
+    });
   }
 
 
@@ -277,16 +296,12 @@ var paddleApp = (function() {
     s.on('message', function(idAndRooms) {
       clientId = idAndRooms.id;
       showRooms(idAndRooms.rooms);
-      console.log(clientId);
+      // console.log(clientId);
     });
 
-    s.on('add player', function(player) {
-      console.log('add player ' + player);
+    s.on('add player', function(players) {
+      updatePaddles(players);
     });
-    // s.on('roomAssignment', function(roomname) {
-    //   gameRoom = roomname;
-    //   console.log('something happened');
-    // });
   }
 
   function addClickHandlers() {
