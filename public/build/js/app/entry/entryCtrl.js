@@ -11,17 +11,6 @@ angular.module('pp-entry', [])
   socket.on('update games', function() {
     $scope.games = roomFactory.getRooms();
   });
-  // MOVE THIS INTO A SEPARATE SERVICE
-  // FOR STORING CURRENT GAMES???
-  // socket.on('message', function(data) {
-  //   $rootScope.id = data.id;
-  //   $scope.games = data.rooms;
-  // });
-
-  // socket.on('update games', function(data) {
-  //   console.log(data);
-  //   $scope.games = data;
-  // });
 
   $scope.joinGame = function(room) {
     $rootScope.gameRoom = room;
