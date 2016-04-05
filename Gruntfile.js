@@ -3,9 +3,9 @@ module.exports = function(grunt) {
 
   var jsLibs = [
     'public/build/js/libs/d3.min.js',
-    'bower_components/angular/angular.min.js',
-    'bower_components/angular-route/angular-route.min.js',
-    'bower_components/angular-socket-io/socket.min.js'
+    'public/build/js/libs/angular.min.js',
+    'public/build/js/libs/angular-route.min.js',
+    'public/build/js/libs/socket.min.js'
   ];
   var jsApp = ['public/build/js/app/**/*.js'];
 
@@ -32,7 +32,7 @@ module.exports = function(grunt) {
     },
 
     jshint: {
-      all: ['Gruntfile.js', 'public/build/js/app.js', 'index.js']
+      all: ['Gruntfile.js', 'public/build/js/app/**/*.js', 'index.js']
     },
 
     uglify: {

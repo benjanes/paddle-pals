@@ -377,7 +377,7 @@ angular.module('pp-room', [])
 
   $scope.init = function() {
     setupBoard();
-  }
+  };
   
   $scope.init();
 });

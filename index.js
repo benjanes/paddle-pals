@@ -33,11 +33,8 @@ io.on('connection', function(socket) {
     // UPDATE THIS SO THAT NEW PLAYERS CAN JOIN AFTER OLD PLAYERS LEAVE!
     var sides = paddleSides.slice();
     for (var player in allRooms[roomname]) {
-      sides = sides.filter(function(side) {
-        return side !== allRooms[roomname][player];
-      });
+      sides = sides.filter(filterSides);
     }
-    console.log(sides);
     var side = sides[0];
     
     allRooms[roomname][socket.id] = side;
@@ -80,7 +77,6 @@ io.on('connection', function(socket) {
   socket.on('leaveRoom', function(client) {
     removePlayer(client.id);
     if (socket.id === client.id) {
-      console.log('LEAVE ROOM');
       socket.leave(client.room);
     }
     io.emit('update games', parseRooms(allRooms));
@@ -111,6 +107,10 @@ function parseRooms(rooms) {
     }
   }
   return openRooms;
+}
+
+function filterSides(side) {
+  return side !== allRooms[roomname][player];
 }
 
 http.listen(port, function() {

@@ -16,7 +16,7 @@ angular.module('pp-services', [])
 
   socket.on('update games', function(data) {
     currentRooms = data;
-  })
+  });
 
   var getRooms = function() {
     return currentRooms;
