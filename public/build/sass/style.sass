@@ -7,9 +7,26 @@ body
 
 .title
   text-align: center
+  text-shadow: 0px 0px 20px #fff
+  transform: translateX(0)
   font-family: 'Monoton', sans-serif
   margin: 0
   font-size: 3em
+  animation: slide 2s 1s
+
+@keyframes slide
+  0%
+    transform: translateX(0)
+    text-shadow: 0px 0px 20px #fff
+  30%
+    transform: translateX(80px)
+    text-shadow: -30px 0px 20px #fff
+  70%
+    transform: translateX(-80px)
+    text-shadow: 30px 0px 20px #fff
+  100%
+    transform: translateX(0)
+    text-shadow: 0px 0px 20px #fff
 
 main 
   width: 100%
@@ -64,6 +81,7 @@ circle
 .add-game:hover
   color: #fff
   background: #000
+  border: 2px solid #fff
 
 .score
   margin: 0
