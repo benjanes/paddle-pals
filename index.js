@@ -22,7 +22,7 @@ io.on('connection', function(socket) {
     
     setTimeout(function() {
       socket.emit('start new game', id);
-    }, 100);
+    }, 250);
     
   });
 
@@ -49,7 +49,7 @@ io.on('connection', function(socket) {
         room : roomname,
         players : allRooms[roomname]
       });
-    }, 100);
+    }, 250);
   
   });
 
