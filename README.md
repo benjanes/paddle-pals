@@ -1,3 +1,3 @@
 # Paddle Pals
 
-_Paddle Pals_ is a collaborative game built with D3 and Socket.IO. Visit ___ to play live with other users!
+_Paddle Pals_ is a collaborative paddle ball game built with Node, Express, Angular, D3, and Socket.IO. Visit http://paddle-pals.herokuapp.com/ to play live with other users.
